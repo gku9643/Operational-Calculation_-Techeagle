@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drone Operations Dashboard</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inter Font -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #e2e8f0; /* Lighter gray-blue background */
+        }
+        .card {
+            background-color: #ffffff;
+            border-radius: 1.5rem; /* rounded-3xl */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-xl */
+            padding: 2rem; /* p-8 */
+            border: 1px solid #e2e8f0;
+        }
+        .section-card {
+            background-color: #f8fafc;
+            border-radius: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+        }
+        .label {
+            font-weight: 500; /* Medium */
+            color: #475569; /* Slate 600 */
+        }
+        .value {
+            font-weight: 700; /* Bold */
+            color: #1e293b; /* Slate 900 */
+        }
+        .highlight-card {
+            border-radius: 1rem;
+            padding: 1.5rem;
+        }
+        .highlight-card.green {
+            background-color: #ecfdf5; /* Green 50 */
+            border: 2px solid #34d399; /* Green 400 */
+        }
+        .highlight-card.red {
+            background-color: #fef2f2; /* Red 50 */
+            border: 2px solid #ef4444; /* Red 400 */
+        }
+        /* Style for collapsible sections */
+        details {
+            border: 1px solid #e2e8f0;
+            border-radius: 1rem;
+            margin-bottom: 1rem;
+            background-color: #f8fafc;
+        }
+        details summary {
+            cursor: pointer;
+            padding: 1.5rem;
+            font-weight: 600;
+            font-size: 1.25rem;
+            color: #475569;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        details[open] summary {
+            border-bottom: 1px solid #e2e8f0;
+        }
+        details summary::-webkit-details-marker {
+            display: none;
+        }
+        details summary:after {
+            content: '▼';
+            transition: transform 0.2s;
+        }
+        details[open] summary:after {
+            transform: rotate(180deg);
+        }
+        details .details-content {
+            padding: 1.5rem;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div class="max-w-4xl mx-auto space-y-8">
+        <h1 class="text-4xl font-extrabold text-center text-slate-800 tracking-tight">Drone Operations Dashboard</h1>
+        <p class="text-center text-slate-500">Analyze and plan your drone logistics with detailed cost breakdowns and resource requirements.</p>
+
+        <!-- Input Section -->
+        <div class="card">
+            <h2 class="text-2xl font-bold text-slate-700 mb-6">Input Parameters</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                <!-- Payload Weight -->
+                <div>
+                    <label for="payloadWeight" class="block label text-sm">Payload Weight (kg)</label>
+                    <input type="number" id="payloadWeight" value="4" min="1" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-3">
+                </div>
+
+                <!-- Payload Type (Dropdown) -->
+                <div>
+                    <label for="payloadType" class="block label text-sm">Payload Type</label>
+                    <select id="payloadType" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-3">
+                        <option value="Medical Supplies">Medical Supplies</option>
+                        <option value="Documents">Documents</option>
+                        <option value="Small Parcels">Small Parcels</option>
+                        <option value="Food">Food</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+                <!-- Temperature Sensitive -->
+                <div class="flex items-center">
+                    <input id="temperatureSensitive" type="checkbox" class="h-5 w-5 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                    <label for="temperatureSensitive" class="ml-2 block label text-sm">Temperature Sensitive Payload</label>
+                </div>
+
+                <!-- One-Way Distance -->
+                <div>
+                    <label for="distance" class="block label text-sm">One-Way Distance (km)</label>
+                    <input type="number" id="distance" value="30" min="1" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-3">
+                </div>
+
+                <!-- Number of Hubs -->
+                <div>
+                    <label for="numHubs" class="block label text-sm">Number of Hubs</label>
+                    <input type="number" id="numHubs" value="1" min="1" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-3">
+                </div>
+
+                <!-- Number of Nodes (Spokes) -->
+                <div>
+                    <label for="numNodes" class="block label text-sm">Number of Nodes (Spokes)</label>
+                    <input type="number" id="numNodes" value="3" min="1" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-3">
+                </div>
+
+                <!-- Parallel Flights -->
+                <div>
+                    <label for="parallelFlights" class="block label text-sm">Number of Parallel Flights</label>
+                    <input type="number" id="parallelFlights" value="1" min="1" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-3">
+                </div>
+
+                <!-- Operating Days -->
+                <div>
+                    <label for="operatingDays" class="block label text-sm">Operating Days (for this calculation)</label>
+                    <input type="number" id="operatingDays" value="30" min="1" max="365" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-3">
+                </div>
+
+                <!-- Total Flights per Day -->
+                <div>
+                    <label for="flightsPerDay" class="block label text-sm">Total Flights per Day (legs)</label>
+                    <input type="number" id="flightsPerDay" value="10" min="1" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-3">
+                </div>
+
+                <!-- Hidden inputs for fixed parameters -->
+                <input type="hidden" id="droneSpeed" value="90">
+                <input type="hidden" id="totalGroundTime" value="30">
+                <input type="hidden" id="workingHours" value="8">
+                <input type="hidden" id="batteryLifeCycles" value="400">
+                <input type="hidden" id="batteryChargeTime" value="60"> <!-- 1 hour charging time -->
+            </div>
+
+            <!-- Calculate Button -->
+            <div class="mt-10 flex justify-center">
+                <button id="calculate-btn" onclick="calculateDashboard()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-12 rounded-full shadow-lg transition-transform transform hover:scale-105">
+                    Calculate
+                </button>
+            </div>
+        </div>
+
+        <!-- Output Section -->
+        <div class="card">
+            <h2 class="text-2xl font-bold text-slate-700 mb-6">Operational Summary</h2>
+            <div id="output">
+                <!-- Placeholder for content or message -->
+                <p id="message" class="text-center text-gray-500 p-8">Enter your parameters and click 'Calculate' to see the results.</p>
+
+                <!-- Loading Spinner (initially hidden) -->
+                <div id="loading-spinner" class="hidden flex justify-center items-center p-8">
+                    <svg class="animate-spin -ml-1 mr-3 h-10 w-10 text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span class="text-xl text-indigo-500 font-semibold">Calculating...</span>
+                </div>
+                 <!-- New container for dynamic results -->
+                <div id="results-container" class="space-y-6"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Define drone selection matrix based on payload and distance, as provided by the user.
+        // The payload ranges have been slightly adjusted for programmatic comparison.
+        const droneMatrix = [
+            // Payload <= 2 kg
+            { minPayload: 0, maxPayload: 2, distances: [
+                { maxDist: 7, drone: 'Verticopter X5' },
+                { maxDist: 10, drone: 'Verticopter X5' },
+                { maxDist: 15, drone: 'Verticopter X5' },
+                { maxDist: 30, drone: 'Vertiplane X3' },
+                { maxDist: 50, drone: 'Vertiplane X3' },
+                { maxDist: 60, drone: 'Vertiplane X3' },
+                { maxDist: 70, drone: 'Vertiplane X5' },
+                { maxDist: Infinity, drone: 'Vertiplane X5' }
+            ]},
+            // Payload >2 – ≤ 3 kg
+            { minPayload: 2.01, maxPayload: 3, distances: [
+                { maxDist: 7, drone: 'Verticopter X5' },
+                { maxDist: 10, drone: 'Verticopter X5' },
+                { maxDist: 15, drone: 'Verticopter X5' },
+                { maxDist: 30, drone: 'Vertiplane X3' },
+                { maxDist: 50, drone: 'Vertiplane X3' },
+                { maxDist: 60, drone: 'Vertiplane X5' },
+                { maxDist: 70, drone: 'Vertiplane X5' },
+                { maxDist: Infinity, drone: 'Vertiplane X5' }
+            ]},
+            // Payload >3 – ≤ 5 kg
+            { minPayload: 3.01, maxPayload: 5, distances: [
+                { maxDist: 7, drone: 'Verticopter X5' },
+                { maxDist: 10, drone: 'Verticopter X5' },
+                { maxDist: 15, drone: 'Verticopter X3 - Validate or Vertiplane X5' },
+                { maxDist: 30, drone: 'Verticopter X3 - Validate or Vertiplane X5' },
+                { maxDist: 50, drone: 'Vertiplane X5' },
+                { maxDist: 60, drone: 'Vertiplane X5' },
+                { maxDist: 70, drone: 'Vertiplane X5' },
+                { maxDist: Infinity, drone: 'Vertiplane X5' }
+            ]},
+            // Payload >5 – ≤ 7 kg
+            { minPayload: 5.01, maxPayload: 7, distances: [
+                { maxDist: 7, drone: 'Verticopter X5' },
+                { maxDist: 10, drone: 'Verticopter X5' },
+                { maxDist: 15, drone: 'Vertiplane X5' },
+                { maxDist: 30, drone: 'Vertiplane X5' },
+                { maxDist: 50, drone: 'Vertiplane X5' },
+                { maxDist: 60, drone: 'Vertiplane X5' },
+                { maxDist: 70, drone: 'Vertiplane X5' },
+                { maxDist: Infinity, drone: 'Vertiplane X5' }
+            ]},
+            // Payload >7 – ≤ 10 kg
+            { minPayload: 7.01, maxPayload: 10, distances: [
+                { maxDist: 7, drone: 'Verticopter X5 or Vertiplane X5' },
+                { maxDist: 10, drone: 'Vertiplane X5' },
+                { maxDist: 15, drone: 'Vertiplane X5' },
+                { maxDist: 30, drone: 'Not Recommended' },
+                { maxDist: 50, drone: 'Not Recommended' },
+                { maxDist: 60, drone: 'Not Recommended' },
+                { maxDist: 70, drone: 'Not Recommended' },
+                { maxDist: Infinity, drone: 'Not Supported' }
+            ]},
+            // Payload > 10 kg
+            { minPayload: 10.01, maxPayload: Infinity, distances: [
+                { maxDist: Infinity, drone: 'Not Supported' }
+            ]}
+        ];
+
+        /**
+         * Determines the suggested drone model based on payload weight and distance.
+         * @param {number} payload - The payload weight in kg.
+         * @param {number} distance - The one-way distance in km.
+         * @returns {string} The name of the suggested drone model.
+         */
+        function getSuggestedDrone(payload, distance) {
+            const payloadRow = droneMatrix.find(row => payload >= row.minPayload && payload <= row.maxPayload);
+            if (payloadRow) {
+                const distanceColumn = payloadRow.distances.find(col => distance <= col.maxDist);
+                return distanceColumn ? distanceColumn.drone.replace('– Validate', '').trim() : 'Not Supported / Custom Model Required';
+            }
+            return 'Not Supported / Custom Model Required';
+        }
+
+        /**
+         * Main function to calculate and display the dashboard results.
+         */
+        function calculateDashboard() {
+            // Get references to key elements
+            const resultsContainer = document.getElementById('results-container');
+            const messageDiv = document.getElementById('message');
+            const spinnerDiv = document.getElementById('loading-spinner');
+            const calculateBtn = document.getElementById('calculate-btn');
+
+            // Show loading state and hide previous results
+            resultsContainer.innerHTML = '';
+            messageDiv.classList.add('hidden');
+            spinnerDiv.classList.remove('hidden');
+            calculateBtn.disabled = true;
+
+            // Simulate a network delay for the loading spinner to be visible
+            setTimeout(() => {
+                // Get input values from the user
+                const payloadWeight = parseFloat(document.getElementById('payloadWeight').value);
+                const payloadType = document.getElementById('payloadType').value;
+                const temperatureSensitive = document.getElementById('temperatureSensitive').checked;
+                const distance = parseFloat(document.getElementById('distance').value);
+                const numHubs = parseInt(document.getElementById('numHubs').value);
+                const numNodes = parseInt(document.getElementById('numNodes').value);
+                const parallelFlights = parseInt(document.getElementById('parallelFlights').value);
+                const operatingDays = parseFloat(document.getElementById('operatingDays').value);
+                const flightsPerDayInput = parseFloat(document.getElementById('flightsPerDay').value);
+
+                // Monthly days for salary calculations is now a fixed value
+                const monthlyDays = 30;
+
+                // Fixed parameters from the analysis files
+                const droneSpeed = 90; // 90 km/h
+                const totalGroundTime = 30; // 30 min
+                const workingHours = 8; // 8 hours
+                const batteryLifeCycles = 400; // 400 effective cycles
+                const batteryChargeTime = 60; // 1 hour charging time
+
+                // --- Drone Type Decision Logic ---
+                const suggestedDrone = getSuggestedDrone(payloadWeight, distance);
+
+                let outputHtml = '';
+
+                if (suggestedDrone.includes('Not Supported') || suggestedDrone.includes('Not Recommended')) {
+                     outputHtml = `
+                         <div class="p-6 flex items-center justify-center space-x-4 bg-yellow-50 border-2 border-yellow-400 rounded-xl text-yellow-700">
+                             <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" viewBox="0 0 20 20" fill="currentColor">
+                                 <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.487 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                             </svg>
+                             <div>
+                                 <p class="font-bold text-lg mb-1">Drone Model Not Supported</p>
+                                 <p class="text-sm">The selected combination of payload and distance is not supported by our current drone models. Please adjust the input parameters.</p>
+                             </div>
+                         </div>
+                     `;
+                     resultsContainer.innerHTML = outputHtml;
+                     spinnerDiv.classList.add('hidden');
+                     calculateBtn.disabled = false;
+                     return;
+                }
+
+                // --- Cost & Depreciation Constants based on Drone Type ---
+                let droneInvestmentCost;
+                let droneDepreciationPerFlight;
+
+                // Check for Verticopter models
+                if (suggestedDrone.includes('Verticopter X5')) {
+                    droneInvestmentCost = 514333.33; // Provided cost for Verticopter X5
+                    droneDepreciationPerFlight = 257.17;
+                } else if (suggestedDrone.includes('Verticopter X3')) {
+                    // Assumption: Verticopter X3 is less expensive than X5
+                    droneInvestmentCost = 450000;
+                    droneDepreciationPerFlight = 225;
+                }
+                // Check for Vertiplane models
+                else if (suggestedDrone.includes('Vertiplane X3')) {
+                    droneInvestmentCost = 1190538.83; // Provided cost for Vertiplane X3
+                    droneDepreciationPerFlight = 574.33;
+                } else if (suggestedDrone.includes('Vertiplane X5')) {
+                    // Assumption: Vertiplane X5 is more expensive than X3
+                    droneInvestmentCost = 1300000;
+                    droneDepreciationPerFlight = 650;
+                } else {
+                    // Default or fallback for any other case (should not be reached)
+                    droneInvestmentCost = 0;
+                    droneDepreciationPerFlight = 0;
+                }
+
+                // Proceed with calculations
+                const numRoundTripsPerDay = flightsPerDayInput / 2;
+                if (flightsPerDayInput % 2 !== 0 || flightsPerDayInput === 0) {
+                    outputHtml = `
+                        <div class="p-6 flex items-center justify-center space-x-4 bg-red-50 border-2 border-red-400 rounded-xl text-red-700">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                            </svg>
+                            <div>
+                                <p class="font-bold text-lg mb-1">Invalid Input</p>
+                                <p class="text-sm">Please enter an **even, non-zero number** for "Total Flights per Day (legs)" to represent complete round trips.</p>
+                            </div>
+                        </div>
+                    `;
+                    resultsContainer.innerHTML = outputHtml;
+                    spinnerDiv.classList.add('hidden');
+                    calculateBtn.disabled = false;
+                    return;
+                }
+
+                // --- Drone Requirement Estimation ---
+                const totalDronesRequired = parallelFlights;
+                const totalDroneInvestment = totalDronesRequired * droneInvestmentCost;
+
+                // --- Battery Logic (Updated as per user's specific cases) ---
+                let dailyOnSiteBatteries = 0;
+                const flightTimePerTrip = (2 * distance / droneSpeed) * 60; // Time for one round trip
+                // Case 1: Flight time >= 30 minutes
+                if (flightTimePerTrip >= 30) {
+                    if (flightsPerDayInput <= 2) {
+                        dailyOnSiteBatteries = 2; // 1 on Hub, 1 on Spoke
+                    } else { // flightsPerDayInput > 2
+                        dailyOnSiteBatteries = 3; // 2 on Hub, 1 on Spoke
+                    }
+                }
+                // Case 2: Flight time < 30 minutes
+                else { // flightTimePerTrip < 30
+                    if (flightsPerDayInput <= 2) {
+                        dailyOnSiteBatteries = 2; // 1 on Hub, 1 on Spoke
+                    } else if (flightsPerDayInput > 2 && flightsPerDayInput <= 4) {
+                        dailyOnSiteBatteries = 4; // 2 on Hub, 2 on Spoke
+                    } else { // flightsPerDayInput > 4
+                        dailyOnSiteBatteries = 5; // 3 on Hub, 2 on Spoke
+                    }
+                }
+                const batteryCostPerSet = 35000;
+                const totalBatteryInvestment = dailyOnSiteBatteries * batteryCostPerSet;
+
+                // --- Manpower Requirements (Updated to match Hub and Spoke Model) ---
+                const hubManagersRequired = numHubs * 1; // Senior Pilot
+                const juniorHubPilotsRequired = numHubs * Math.max(0, parallelFlights - 1);
+                const spokePilotsRequired = numNodes * 1; // P3 or P4 pilot at each spoke
+                const totalPersonnel = hubManagersRequired + juniorHubPilotsRequired + spokePilotsRequired;
+
+                // --- Cost Calculation & Categorization (based on 'Operations Cost' file) ---
+                const batteryDepreciationPerFlight = 87.5;
+                const equipmentDepreciationPerDay = 205.48; // Rounded from the CSV
+
+                const hubManagerSalaryMonthly = 50000;
+                const juniorPilotSalaryMonthly = 35000;
+                const spokePilotSalaryMonthly = 15000;
+
+                const foodStayCostPerPerson = 900;
+                const travelLogisticsMonthly = 15000;
+                const packagingCostDaily = 100; // Estimated from consumables in BOM
+
+                const contingencyRate = 0.05;
+                const otherOverheadsMonthly = 5000; // A fixed placeholder value for other costs
+
+                // Calculate Daily Costs
+                const dailyDroneDepreciation = droneDepreciationPerFlight * numRoundTripsPerDay;
+                const dailyBatteryDepreciation = batteryDepreciationPerFlight * numRoundTripsPerDay;
+                const dailyEquipmentDepreciation = equipmentDepreciationPerDay;
+                const dailyOverheads = otherOverheadsMonthly / monthlyDays;
+
+                const dailyHubManagerSalary = (hubManagerSalaryMonthly / monthlyDays) * hubManagersRequired;
+                const dailyHubPilotSalary = (juniorPilotSalaryMonthly / monthlyDays) * juniorHubPilotsRequired;
+                const dailySpokePilotSalary = (spokePilotSalaryMonthly / monthlyDays) * spokePilotsRequired;
+
+                const dailyFoodStay = foodStayCostPerPerson * totalPersonnel;
+                const dailyTravelLogistics = travelLogisticsMonthly / monthlyDays;
+                const dailyPackaging = packagingCostDaily;
+
+                // Summarize daily costs into logical groups
+                const totalDailyDepreciationOverhead = dailyDroneDepreciation + dailyBatteryDepreciation + dailyEquipmentDepreciation + dailyOverheads;
+                const totalDailyManpowerCost = dailyHubManagerSalary + dailyHubPilotSalary + dailySpokePilotSalary;
+                const totalDailyTeamExpenses = dailyFoodStay + dailyTravelLogistics + dailyPackaging;
+
+                // Final Totals
+                const totalDailyOperationalCost = totalDailyDepreciationOverhead + totalDailyManpowerCost + totalDailyTeamExpenses;
+                const contingencyBufferDaily = totalDailyOperationalCost * contingencyRate;
+                const totalDailyCostWithContingency = totalDailyOperationalCost + contingencyBufferDaily;
+
+                // New calculations for Annual and Total Ops Costs
+                const totalOperationalCostWithoutContingency = totalDailyOperationalCost * operatingDays;
+                const totalOpsCostForPeriodWithContingency = totalDailyCostWithContingency * operatingDays;
+
+                // Calculate the "Team Transfer" amount as per the user's request (only team expenses)
+                const totalTeamExpensesForPeriod = (totalDailyManpowerCost + totalDailyTeamExpenses) * operatingDays;
+                const totalTeamTransferWithContingency = totalTeamExpensesForPeriod + (totalTeamExpensesForPeriod * contingencyRate);
+
+                // Corrected Annual Ops Cost calculation (365 days)
+                const annualOperationalCostWithoutContingency = totalDailyOperationalCost * 365;
+                const annualOpsCostWithContingency = totalDailyCostWithContingency * 365;
+
+
+                // --- Render Output ---
+                outputHtml = `
+                    <!-- Final Totals (Top Summary) -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                        <div class="highlight-card green">
+                            <h4 class="text-sm font-bold text-green-700 mb-2">Team Transfer (for ${operatingDays} days)</h4>
+                            <p class="text-3xl value text-green-800">₹${totalTeamTransferWithContingency.toFixed(2)}</p>
+                            <p class="text-sm text-green-600 mt-2">This includes manpower and team expenses plus a 5% contingency.</p>
+                        </div>
+                        <div class="highlight-card red">
+                            <h4 class="text-sm font-bold text-red-700 mb-2">Total Operational Cost (for ${operatingDays} days)</h4>
+                            <p class="text-3xl value text-red-800">₹${totalOpsCostForPeriodWithContingency.toFixed(2)}</p>
+                            <p class="text-sm text-red-600 mt-2">This includes all daily costs, with a 5% contingency, for the specified operating period.</p>
+                        </div>
+                    </div>
+
+                    <!-- Collapsible Sections for Details -->
+                    <details open>
+                        <summary>Resource & Investment Details</summary>
+                        <div class="details-content grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <!-- Card 1: Resources & Fleet -->
+                            <div class="section-card">
+                                <h3 class="text-xl font-bold text-indigo-700 mb-6">Resources & Fleet</h3>
+                                <div class="space-y-6">
+                                    <!-- Drone Details -->
+                                    <div>
+                                        <p class="label">Suggested Drone Model</p>
+                                        <p class="text-3xl value">${suggestedDrone}</p>
+                                        ${temperatureSensitive ? `<p class="text-xs text-red-600 mt-1 font-medium">Requires Insulated Payload Box</p>` : ''}
+                                    </div>
+                                    <hr class="border-gray-200">
+                                    <!-- Drones Required -->
+                                    <div>
+                                        <p class="label">Drones Required</p>
+                                        <p class="text-2xl value">${totalDronesRequired}</p>
+                                    </div>
+                                    <!-- Batteries Required -->
+                                    <div>
+                                        <p class="label">Batteries Required (Daily)</p>
+                                        <p class="text-2xl value">${dailyOnSiteBatteries}</p>
+                                        <p class="text-xs text-slate-500 mt-1">Number of charged battery sets needed per day for uninterrupted operation.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Card 2: Investment & Team -->
+                            <div class="section-card">
+                                <h3 class="text-xl font-bold text-indigo-700 mb-6">Investment & Team</h3>
+                                <div class="space-y-6">
+                                    <!-- Capital Investments -->
+                                    <div>
+                                        <p class="label">Total Drone Investment</p>
+                                        <p class="text-2xl value">₹${totalDroneInvestment.toFixed(2)}</p>
+                                    </div>
+                                    <div>
+                                        <p class="label">Total Battery Investment (On-Site Sets)</p>
+                                        <p class="text-2xl value">₹${totalBatteryInvestment.toFixed(2)}</p>
+                                    </div>
+                                    <hr class="border-gray-200">
+                                    <!-- Manpower -->
+                                    <div>
+                                        <p class="label">Total Personnel Required</p>
+                                        <p class="text-2xl value mb-4">${totalPersonnel}</p>
+                                        <ul class="space-y-2 text-sm text-slate-600">
+                                            <li>- Hub Managers: <span class="font-bold">${hubManagersRequired}</span></li>
+                                            <li>- Junior Hub Pilots: <span class="font-bold">${juniorHubPilotsRequired}</span></li>
+                                            <li>- Spoke Pilots: <span class="font-bold">${spokePilotsRequired}</span></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </details>
+
+                    <details>
+                        <summary>Daily Cost Breakdown</summary>
+                        <div class="details-content grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            <div>
+                                <h4 class="text-lg font-bold text-slate-800 mb-2">Manpower Costs</h4>
+                                <p class="text-sm text-slate-500 mb-4">Total: ₹${totalDailyManpowerCost.toFixed(2)} / day</p>
+                                <ul class="space-y-2 text-sm">
+                                    <li class="flex justify-between items-center"><span class="text-slate-600">Hub Manager Salary</span><span class="value">₹${dailyHubManagerSalary.toFixed(2)}</span></li>
+                                    <li class="flex justify-between items-center"><span class="text-slate-600">Hub Pilot Salary</span><span class="value">₹${dailyHubPilotSalary.toFixed(2)}</span></li>
+                                    <li class="flex justify-between items-center"><span class="text-slate-600">Spoke Pilot Salary</span><span class="value">₹${dailySpokePilotSalary.toFixed(2)}</span></li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-bold text-slate-800 mb-2">Team Expenses</h4>
+                                <p class="text-sm text-slate-500 mb-4">Total: ₹${totalDailyTeamExpenses.toFixed(2)} / day</p>
+                                <ul class="space-y-2 text-sm">
+                                    <li class="flex justify-between items-center"><span class="text-slate-600">Food & Stay</span><span class="value">₹${dailyFoodStay.toFixed(2)}</span></li>
+                                    <li class="flex justify-between items-center"><span class="text-slate-600">Travel & Logistics</span><span class="value">₹${dailyTravelLogistics.toFixed(2)}</span></li>
+                                    <li class="flex justify-between items-center"><span class="text-slate-600">Packaging</span><span class="value">₹${dailyPackaging.toFixed(2)}</span></li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-bold text-slate-800 mb-2">Depreciation & Overhead</h4>
+                                <p class="text-sm text-slate-500 mb-4">Total: ₹${totalDailyDepreciationOverhead.toFixed(2)} / day</p>
+                                <ul class="space-y-2 text-sm">
+                                    <li class="flex justify-between items-center"><span class="text-slate-600">Drone Depreciation</span><span class="value">₹${dailyDroneDepreciation.toFixed(2)}</span></li>
+                                    <li class="flex justify-between items-center"><span class="text-slate-600">Battery Depreciation</span><span class="value">₹${dailyBatteryDepreciation.toFixed(2)}</span></li>
+                                    <li class="flex justify-between items-center"><span class="text-slate-600">Equipment Depreciation</span><span class="value">₹${dailyEquipmentDepreciation.toFixed(2)}</span></li>
+                                    <li class="flex justify-between items-center"><span class="text-slate-600">Other Overheads</span><span class="value">₹${dailyOverheads.toFixed(2)}</span></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </details>
+
+                    <details>
+                        <summary>Fixed and Total Costs</summary>
+                        <div class="details-content grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <!-- Total Investments -->
+                            <div class="section-card">
+                                <h3 class="text-xl font-bold text-indigo-700 mb-6">Total Investment</h3>
+                                <div class="space-y-6">
+                                    <div>
+                                        <p class="label">Total Drone Investment</p>
+                                        <p class="text-2xl value">₹${totalDroneInvestment.toFixed(2)}</p>
+                                    </div>
+                                    <div>
+                                        <p class="label">Total Battery Investment (On-Site Sets)</p>
+                                        <p class="text-2xl value">₹${totalBatteryInvestment.toFixed(2)}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Period/Annual Costs -->
+                            <div class="section-card">
+                                <h3 class="text-xl font-bold text-indigo-700 mb-6">Period & Annual Costs</h3>
+                                <div class="space-y-6">
+                                    <div>
+                                        <p class="label">Total Operational Cost (for ${operatingDays} days)</p>
+                                        <p class="text-2xl value">₹${totalOperationalCostWithoutContingency.toFixed(2)}</p>
+                                        <p class="text-sm text-slate-500 mt-1">Excludes 5% contingency.</p>
+                                    </div>
+                                    <div>
+                                        <p class="label">Total Operational Cost (for ${operatingDays} days) with Contingency</p>
+                                        <p class="text-2xl value">₹${totalOpsCostForPeriodWithContingency.toFixed(2)}</p>
+                                        <p class="text-sm text-slate-500 mt-1">Includes 5% contingency.</p>
+                                    </div>
+                                    <hr class="border-gray-200">
+                                    <div>
+                                        <p class="label">Annual Operational Cost</p>
+                                        <p class="text-2xl value">₹${annualOperationalCostWithoutContingency.toFixed(2)}</p>
+                                        <p class="text-sm text-slate-500 mt-1">Excludes 5% contingency.</p>
+                                    </div>
+                                    <div>
+                                        <p class="label">Annual Operational Cost with Contingency</p>
+                                        <p class="text-2xl value">₹${annualOpsCostWithContingency.toFixed(2)}</p>
+                                        <p class="text-sm text-slate-500 mt-1">Includes 5% contingency.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </details>
+                `;
+                // Now, we inject the generated HTML into the new results-container.
+                resultsContainer.innerHTML = outputHtml;
+                spinnerDiv.classList.add('hidden');
+                calculateBtn.disabled = false;
+            }, 1000); // 1-second delay for the spinner
+        }
+    </script>
+</body>
+</html>

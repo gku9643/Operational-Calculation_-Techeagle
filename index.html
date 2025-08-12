@@ -456,7 +456,7 @@
                 const totalOpsCostForPeriodWithContingency = totalDailyCostWithContingency * operatingDays;
 
                 // Calculate the "Team Transfer" amount as per the user's request (only team expenses)
-                const totalTeamExpensesForPeriod = (totalDailyManpowerCost + totalDailyTeamExpenses) * operatingDays;
+                const totalTeamExpensesForPeriod = (totalDailyTeamExpenses) * operatingDays;
                 const totalTeamTransferWithContingency = totalTeamExpensesForPeriod + (totalTeamExpensesForPeriod * contingencyRate);
 
                 // Corrected Annual Ops Cost calculation (365 days)
